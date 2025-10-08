@@ -13,30 +13,6 @@
         <h1 class="mb-3">投資本サイトへようこそ！📚💰</h1>
         <p class="mb-4">このサイトでは、自分の投資本を管理したり、資産ダッシュボードを作ったりできます。</p>
 
-        <!-- ユーザー一覧 -->
-        <div class="user-list mb-4">
-            <h2 class="mb-3">ユーザー一覧</h2>
-            {% if users %}
-                <ul class="list-group">
-                    {% for user in users %}
-                        <li class="list-group-item d-flex align-items-center">
-                            <a href="{{ url_for('profile', user_id=user.id) }}" class="d-flex align-items-center text-decoration-none">
-                                {% if user.icon %}
-                                    <img src="{{ url_for('static', filename='icons/' + user.icon) }}" 
-                                        alt="icon" class="list-icon me-2">
-                                {% else %}
-                                    <img src="{{ url_for('static', filename='icons/default.png') }}" 
-                                        alt="default icon" class="list-icon me-2">
-                                {% endif %}
-                                <span class="username">{{ user.username }}</span>
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>まだユーザーが登録されていません。</p>
-            {% endif %}
-        </div>
 
         <!-- ログイン・登録リンク -->
         <div class="auth-links text-center">
