@@ -186,10 +186,11 @@ a:hover {
 .index-page {
     display: flex;
     flex-direction: column;
-    justify-content: center;  /* 横中央ではなく縦横中央 */
+    justify-content: flex-start; /* 上寄りにする */
     align-items: center;
-    min-height: 100vh;        /* 画面全体の高さ */
-    padding: 20px;
+    min-height: 100vh;          /* 画面全体の高さ */
+    padding-top: 10vh;          /* 上から少し余白 */
+    padding-bottom: 20px;
     box-sizing: border-box;
 }
 
