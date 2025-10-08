@@ -12,3 +12,4 @@ werkzeug
 gunicorn
 email_validator
 psycopg2-binary
+Flask-Mail>=0.9.1
