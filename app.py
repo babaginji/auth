@@ -1,14 +1,5 @@
 import os
-from flask import (
-    Flask,
-    render_template,
-    redirect,
-    url_for,
-    flash,
-    request,
-    current_app,
-    abort,
-)
+from flask import Flask, render_template, redirect, url_for, flash, request, current_app
 from flask_login import (
     LoginManager,
     login_user,
@@ -20,6 +11,8 @@ from werkzeug.utils import secure_filename
 from models import db, User
 from forms import RegisterForm, LoginForm, EditProfileForm
 from flask_wtf import CSRFProtect
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer
 
 # ----------------------
 # Flask 設定
@@ -30,6 +23,15 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "icons")
 
+# メール設定（例：Gmail）
+app.config.update(
+    MAIL_SERVER="smtp.gmail.com",
+    MAIL_PORT=587,
+    MAIL_USE_TLS=True,
+    MAIL_USERNAME="your_email@gmail.com",
+    MAIL_PASSWORD="your_email_password",
+)
+
 # ----------------------
 # 拡張機能初期化
 # ----------------------
@@ -37,6 +39,8 @@ db.init_app(app)
 csrf = CSRFProtect(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
+mail = Mail(app)
+serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 
 # ----------------------
 # ユーザーローダー
@@ -47,7 +51,7 @@ def load_user(user_id):
 
 
 # ----------------------
-# ホームページ（全ユーザー一覧）
+# ルート: ホーム
 # ----------------------
 @app.route("/")
 def index():
@@ -56,7 +60,7 @@ def index():
 
 
 # ----------------------
-# 登録
+# ルート: 登録
 # ----------------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -65,7 +69,6 @@ def register():
         if User.query.filter_by(email=form.email.data).first():
             flash("このメールアドレスはすでに登録されています。")
             return redirect(url_for("register"))
-
         user = User(
             username=form.username.data,
             email=form.email.data,
@@ -79,7 +82,7 @@ def register():
 
 
 # ----------------------
-# ログイン
+# ルート: ログイン
 # ----------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -95,7 +98,7 @@ def login():
 
 
 # ----------------------
-# ログアウト
+# ルート: ログアウト
 # ----------------------
 @app.route("/logout")
 @login_required
@@ -106,7 +109,7 @@ def logout():
 
 
 # ----------------------
-# プロフィール表示
+# ルート: プロフィール表示
 # ----------------------
 @app.route("/profile/<int:user_id>")
 @login_required
@@ -122,9 +125,6 @@ def profile(user_id):
     )
 
 
-# ----------------------
-# 自分のプロフィール（簡単URL）
-# ----------------------
 @app.route("/profile")
 @login_required
 def my_profile():
@@ -132,7 +132,7 @@ def my_profile():
 
 
 # ----------------------
-# プロフィール編集
+# ルート: プロフィール編集
 # ----------------------
 @app.route("/edit_profile", methods=["GET", "POST"])
 @login_required
@@ -141,55 +141,43 @@ def edit_profile():
     if form.validate_on_submit() or request.method == "POST":
         current_user.username = form.username.data
         current_user.bio = (
-            form.bio.data if hasattr(form, "bio") else getattr(current_user, "bio", "")
+            getattr(form, "bio", None)
+            and form.bio.data
+            or getattr(current_user, "bio", "")
         )
-
         cropped_file = request.files.get("cropped_icon")
         if cropped_file:
             filename = secure_filename(cropped_file.filename)
             file_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
             cropped_file.save(file_path)
             current_user.icon = filename
-
         db.session.commit()
         flash("プロフィールを更新しました！")
         return redirect(url_for("my_profile"))
-
     form.username.data = current_user.username
     form.bio.data = getattr(current_user, "bio", "")
     return render_template("edit_profile.html", form=form, user=current_user)
 
 
 # ----------------------
-# フォロー
+# フォロー/解除
 # ----------------------
 @app.route("/follow/<int:user_id>", methods=["POST"])
 @login_required
 def follow(user_id):
     user = User.query.get_or_404(user_id)
-    if user == current_user:
-        flash("自分自身をフォローすることはできません。")
-        return redirect(url_for("profile", user_id=user_id))
-
-    if not current_user.is_following(user):
+    if user != current_user and not current_user.is_following(user):
         current_user.follow(user)
         db.session.commit()
         flash(f"{user.username} をフォローしました！")
     return redirect(url_for("profile", user_id=user_id))
 
 
-# ----------------------
-# フォロー解除
-# ----------------------
 @app.route("/unfollow/<int:user_id>", methods=["POST"])
 @login_required
 def unfollow(user_id):
     user = User.query.get_or_404(user_id)
-    if user == current_user:
-        flash("自分自身のフォローは解除できません。")
-        return redirect(url_for("profile", user_id=user_id))
-
-    if current_user.is_following(user):
+    if user != current_user and current_user.is_following(user):
         current_user.unfollow(user)
         db.session.commit()
         flash(f"{user.username} のフォローを解除しました。")
@@ -220,14 +208,79 @@ def following(user_id):
 
 
 # ----------------------
-# DB初期化
+# パスワード変更
 # ----------------------
-with app.app_context():
-    db.create_all()
-    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+@app.route("/change_password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    if request.method == "POST":
+        current_pw = request.form.get("current_password")
+        new_pw = request.form.get("new_password")
+        confirm_pw = request.form.get("confirm_password")
+        if not current_user.check_password(current_pw):
+            flash("現在のパスワードが間違っています。", "danger")
+        elif new_pw != confirm_pw:
+            flash("新しいパスワードが一致しません。", "danger")
+        else:
+            current_user.set_password(new_pw)
+            db.session.commit()
+            flash("パスワードを変更しました。", "success")
+            return redirect(url_for("profile", user_id=current_user.id))
+    return render_template("change_password.html")
+
 
 # ----------------------
-# アカウント公開/非公開切替
+# パスワードリセット
+# ----------------------
+@app.route("/reset_password_request", methods=["GET", "POST"])
+def reset_password_request():
+    if current_user.is_authenticated:
+        return redirect(url_for("my_profile"))
+    if request.method == "POST":
+        email = request.form.get("email")
+        user = User.query.filter_by(email=email).first()
+        if user:
+            token = serializer.dumps(user.email, salt="password-reset-salt")
+            reset_url = url_for("reset_password", token=token, _external=True)
+            msg = Message(
+                "パスワード再設定",
+                sender=app.config["MAIL_USERNAME"],
+                recipients=[user.email],
+                body=f"パスワード再設定はこちら:\n{reset_url}\n※30分以内にアクセスしてください",
+            )
+            mail.send(msg)
+            flash("パスワード再設定用のメールを送信しました。", "info")
+        else:
+            flash("登録されていないメールアドレスです。", "danger")
+        return redirect(url_for("login"))
+    return render_template("reset_password_request.html")
+
+
+@app.route("/reset_password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for("my_profile"))
+    try:
+        email = serializer.loads(token, salt="password-reset-salt", max_age=1800)
+    except:
+        flash("無効または期限切れのリンクです。", "danger")
+        return redirect(url_for("reset_password_request"))
+    user = User.query.filter_by(email=email).first_or_404()
+    if request.method == "POST":
+        new_pw = request.form.get("new_password")
+        confirm_pw = request.form.get("confirm_password")
+        if new_pw != confirm_pw:
+            flash("パスワードが一致しません。", "danger")
+        else:
+            user.set_password(new_pw)
+            db.session.commit()
+            flash("パスワードを変更しました。ログインしてください。", "success")
+            return redirect(url_for("login"))
+    return render_template("reset_password.html")
+
+
+# ----------------------
+# アカウント設定（公開/非公開・通知・ダークモード）
 # ----------------------
 @app.route("/toggle_visibility")
 @login_required
@@ -238,9 +291,6 @@ def toggle_visibility():
     return redirect(url_for("my_profile"))
 
 
-# ----------------------
-# フォロー通知ON/OFF
-# ----------------------
 @app.route("/toggle_follow_notifications")
 @login_required
 def toggle_follow_notifications():
@@ -250,9 +300,6 @@ def toggle_follow_notifications():
     return redirect(url_for("my_profile"))
 
 
-# ----------------------
-# コメント通知ON/OFF
-# ----------------------
 @app.route("/toggle_comment_notifications")
 @login_required
 def toggle_comment_notifications():
@@ -262,9 +309,6 @@ def toggle_comment_notifications():
     return redirect(url_for("my_profile"))
 
 
-# ----------------------
-# ダークモードON/OFF
-# ----------------------
 @app.route("/toggle_dark_mode")
 @login_required
 def toggle_dark_mode():
@@ -275,28 +319,11 @@ def toggle_dark_mode():
 
 
 # ----------------------
-# パスワード変更
+# DB初期化
 # ----------------------
-@app.route("/change_password", methods=["GET", "POST"])
-@login_required
-def change_password():
-    if request.method == "POST":
-        current_pw = request.form.get("current_password")
-        new_pw = request.form.get("new_password")
-        confirm_pw = request.form.get("confirm_password")
-
-        if not current_user.check_password(current_pw):
-            flash("現在のパスワードが間違っています。", "danger")
-        elif new_pw != confirm_pw:
-            flash("新しいパスワードが一致しません。", "danger")
-        else:
-            current_user.set_password(new_pw)
-            db.session.commit()
-            flash("パスワードを変更しました。", "success")
-            return redirect(url_for("profile", user_id=current_user.id))
-
-    return render_template("change_password.html")
-
+with app.app_context():
+    db.create_all()
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # ----------------------
 # メイン
