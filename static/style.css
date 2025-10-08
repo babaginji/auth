@@ -1,0 +1,327 @@
+/* ==============================
+   共通スタイル
+============================== */
+body {
+    font-family: "Segoe UI", sans-serif;
+    background-color: #f7f9fb;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ==============================
+   コンテナ
+============================== */
+.container {
+    max-width: 600px;
+    width: 90%;
+    margin: 30px auto;
+    padding: 30px 40px;
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+/* ==============================
+   プロフィールページ
+============================== */
+.profile-page {
+    padding: 20px 0;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #007bff;
+}
+
+.profile-right {
+    margin-left: 20px;
+    flex-grow: 1;
+}
+
+.profile-username {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.follow-info {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.follow-link {
+    cursor: pointer;
+    margin-right: 15px;
+    color: #333;
+}
+
+.follow-link:hover {
+    color: #007bff;
+}
+
+.profile-bio {
+    background-color: #f1f3f5;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.profile-info p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+/* ==============================
+   フォローボタン・編集ボタン
+============================== */
+.follow-btn, .unfollow-btn, .edit-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 5px;
+    display: inline-block;
+}
+
+.follow-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+.unfollow-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.edit-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.follow-btn:hover {
+    background-color: #0056b3;
+}
+
+.unfollow-btn:hover {
+    background-color: #b02a37;
+}
+
+.edit-btn:hover {
+    background-color: #218838;
+}
+
+/* ==============================
+   モーダルリスト用
+============================== */
+.modal-body a {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.modal-body a img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    border: 2px solid #007bff;
+}
+
+/* ==============================
+   設定ドロップダウン
+============================== */
+.profile-settings button {
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.profile-settings img {
+    width: 30px;
+    height: 30px;
+}
+
+.dropdown-menu {
+    border-radius: 12px;
+    padding: 10px 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.dropdown-item {
+    padding: 8px 20px;
+    font-size: 14px;
+}
+
+.dropdown-item:hover {
+    background-color: #f1f3f5;
+}
+
+/* ==============================
+   Indexページ
+============================== */
+.index-page .user-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.index-page .user-list li {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.list-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    border: 2px solid #007bff;
+}
+
+.username {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+/* ==============================
+   フォーム全般
+============================== */
+form label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form textarea {
+    width: 100%;
+    padding: 8px 10px;
+    margin: 5px 0 15px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+form button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background-color: #28a745;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+form button:hover {
+    background-color: #218838;
+}
+
+/* ==============================
+   ログイン/登録リンク
+============================== */
+.auth-links {
+    margin-top: 25px;
+    font-size: 15px;
+    text-align: center;
+}
+
+.auth-links a {
+    margin: 0 5px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+.auth-links a:hover {
+    background-color: #0056b3;
+}
+
+/* ==============================
+   共通ボタンリンク（編集/ログアウト/プロフィール）
+============================== */
+.edit-link, .logout-link, .profile-link {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.edit-link:hover, .logout-link:hover, .profile-link:hover {
+    background-color: #0056b3;
+}
+
+/* ==============================
+   レスポンシブ
+============================== */
+@media screen and (max-width: 480px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .profile-right {
+        margin-left: 0;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .follow-info {
+        font-size: 14px;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .profile-settings {
+        top: 10px;
+        right: 10px;
+    }
+}

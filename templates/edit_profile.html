@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>プロフィール編集</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
+</head>
+<body class="edit-page">
+    <div class="container mt-5">
+        <h1 class="profile-title mb-4">プロフィール編集</h1>
+
+        <form id="profile-form" action="{{ url_for('edit_profile') }}" method="post" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+                <label class="form-label">ユーザー名:</label>
+                {{ form.username(class_="form-control", size=30) }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">自己紹介:</label>
+                {% if form.bio %}
+                    {{ form.bio(class_="form-control", rows=4, cols=40) }}
+                {% else %}
+                    <textarea name="bio" class="form-control" rows="4" cols="40">{{ user.bio or '' }}</textarea>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">アイコン画像:</label>
+                {% if user.icon %}
+                    <img id="current-icon" src="{{ url_for('static', filename='icons/' + user.icon) }}" class="profile-icon mb-2">
+                {% endif %}
+                <input type="file" id="icon-input" class="form-control">
+            </div>
+
+            <!-- クロップ用プレビュー -->
+            <div class="mb-3 text-center">
+                <img id="cropper-preview" style="max-width:300px; display:block; margin:auto;">
+            </div>
+
+            <input type="hidden" name="cropped_icon" id="cropped-icon">
+            <button type="submit" class="btn btn-primary">保存</button>
+            <a href="{{ url_for('profile', user_id=current_user.id) }}" class="btn btn-secondary ms-2">プロフィールに戻る</a>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script>
+        let cropper;
+        const input = document.getElementById('icon-input');
+        const image = document.getElementById('cropper-preview');
+        const hiddenInput = document.getElementById('cropped-icon');
+
+        input.addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                image.src = reader.result;
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(image, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 1,
+                    responsive: true,
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('profile-form').addEventListener('submit', e => {
+            if (cropper) {
+                e.preventDefault();
+                cropper.getCroppedCanvas().toBlob(blob => {
+                    const formData = new FormData(e.target);
+                    formData.set('cropped_icon', blob, 'icon.png');
+
+                    fetch("{{ url_for('edit_profile') }}", {
+                        method: "POST",
+                        body: formData
+                    }).then(res => res.text()).then(() => {
+                        window.location.href = "{{ url_for('profile', user_id=current_user.id) }}";
+                    });
+                });
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
