@@ -181,8 +181,23 @@ a:hover {
 }
 
 /* ==============================
-   Indexページ
+   Indexページ中央寄せ
 ============================== */
+.index-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;  /* 横中央ではなく縦横中央 */
+    align-items: center;
+    min-height: 100vh;        /* 画面全体の高さ */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.index-page .user-list {
+    width: 100%;
+    max-width: 400px;
+}
+
 .index-page .user-list ul {
     list-style: none;
     padding: 0;
