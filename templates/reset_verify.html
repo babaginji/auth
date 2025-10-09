@@ -9,6 +9,16 @@
 </head>
 <body>
     <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flashes">
+                {% for msg in messages %}
+                <li>{{ msg }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        {% endwith %}
+
         <h2>確認コードを入力</h2>
         <form method="POST" action="{{ url_for('reset_verify', email=email) }}">
             <label for="code">メールで送られたコード</label>
@@ -17,8 +27,8 @@
         </form>
         <div>
             <a href="{{ url_for('reset_request') }}">メール送信に戻る</a>
-            <h3>迷惑メールもご確認ください</h3>
         </div>
     </div>
 </body>
+
 </html>
