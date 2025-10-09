@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timedelta
 from flask import Flask, render_template, redirect, url_for, flash, request, current_app
 from flask_login import (
     LoginManager,
@@ -12,7 +13,7 @@ from models import db, User
 from forms import RegisterForm, LoginForm, EditProfileForm
 from flask_wtf import CSRFProtect
 from flask_mail import Mail, Message
-from itsdangerous import URLSafeTimedSerializer
+from email_utils import send_otp_email
 
 # ----------------------
 # Flask 設定
@@ -23,14 +24,14 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "icons")
 
-# メール設定（例：Gmail）
-app.config.update(
-    MAIL_SERVER="smtp.gmail.com",
-    MAIL_PORT=587,
-    MAIL_USE_TLS=True,
-    MAIL_USERNAME="your_email@gmail.com",
-    MAIL_PASSWORD="your_email_password",
-)
+# メール設定（環境変数から取得）
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD")
+mail = Mail(app)
+
 
 # ----------------------
 # 拡張機能初期化
@@ -39,8 +40,6 @@ db.init_app(app)
 csrf = CSRFProtect(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
-mail = Mail(app)
-serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 
 # ----------------------
 # ユーザーローダー
@@ -230,56 +229,6 @@ def change_password():
 
 
 # ----------------------
-# パスワードリセット
-# ----------------------
-@app.route("/reset_password_request", methods=["GET", "POST"])
-def reset_password_request():
-    if current_user.is_authenticated:
-        return redirect(url_for("my_profile"))
-    if request.method == "POST":
-        email = request.form.get("email")
-        user = User.query.filter_by(email=email).first()
-        if user:
-            token = serializer.dumps(user.email, salt="password-reset-salt")
-            reset_url = url_for("reset_password", token=token, _external=True)
-            msg = Message(
-                "パスワード再設定",
-                sender=app.config["MAIL_USERNAME"],
-                recipients=[user.email],
-                body=f"パスワード再設定はこちら:\n{reset_url}\n※30分以内にアクセスしてください",
-            )
-            mail.send(msg)
-            flash("パスワード再設定用のメールを送信しました。", "info")
-        else:
-            flash("登録されていないメールアドレスです。", "danger")
-        return redirect(url_for("login"))
-    return render_template("reset_password_request.html")
-
-
-@app.route("/reset_password/<token>", methods=["GET", "POST"])
-def reset_password(token):
-    if current_user.is_authenticated:
-        return redirect(url_for("my_profile"))
-    try:
-        email = serializer.loads(token, salt="password-reset-salt", max_age=1800)
-    except:
-        flash("無効または期限切れのリンクです。", "danger")
-        return redirect(url_for("reset_password_request"))
-    user = User.query.filter_by(email=email).first_or_404()
-    if request.method == "POST":
-        new_pw = request.form.get("new_password")
-        confirm_pw = request.form.get("confirm_password")
-        if new_pw != confirm_pw:
-            flash("パスワードが一致しません。", "danger")
-        else:
-            user.set_password(new_pw)
-            db.session.commit()
-            flash("パスワードを変更しました。ログインしてください。", "success")
-            return redirect(url_for("login"))
-    return render_template("reset_password.html")
-
-
-# ----------------------
 # アカウント設定（公開/非公開・通知・ダークモード）
 # ----------------------
 @app.route("/toggle_visibility")
@@ -319,11 +268,67 @@ def toggle_dark_mode():
 
 
 # ----------------------
+# ワンタイムパスワードによるパスワード再設定
+# ----------------------
+from email_utils import send_otp_email
+
+
+@app.route("/reset", methods=["GET", "POST"])
+@csrf.exempt
+def reset_request():
+    if request.method == "POST":
+        email = request.form["email"]
+        user = User.query.filter_by(email=email).first()
+        if user:
+            code = user.set_otp()
+            send_otp_email(user, code)
+            flash("確認コードをメールに送信しました。")
+            return redirect(url_for("reset_verify", email=email))
+        else:
+            flash("メールアドレスが見つかりません。")
+    return render_template("reset_request.html")
+
+
+@app.route("/reset/verify", methods=["GET", "POST"])
+@csrf.exempt
+def reset_verify():
+    email = request.args.get("email")
+    user = User.query.filter_by(email=email).first()
+    if request.method == "POST":
+        code = request.form["code"]
+        if user and user.verify_otp(code):
+            flash("コード認証に成功しました。新しいパスワードを設定してください。")
+            return redirect(url_for("reset_password", email=email))
+        else:
+            flash("コードが無効または期限切れです。")
+    return render_template("reset_verify.html")
+
+
+@app.route("/reset/password", methods=["GET", "POST"])
+@csrf.exempt
+def reset_password():
+    email = request.args.get("email")
+    user = User.query.filter_by(email=email).first()
+    if request.method == "POST":
+        new_password = request.form["password"]
+        try:
+            user.set_password(new_password)
+            user.clear_otp()
+            db.session.commit()
+            flash("パスワードを更新しました。ログインしてください。")
+            return redirect(url_for("login"))
+        except ValueError as e:
+            flash(str(e))
+    return render_template("reset_password.html")
+
+
+# ----------------------
 # DB初期化
 # ----------------------
 with app.app_context():
     db.create_all()
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
 
 # ----------------------
 # メイン

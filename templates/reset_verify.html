@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>パスワード再設定確認</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>確認コードを入力</h2>
+        <form method="POST">
+            <label for="code">メールで送られたコード</label>
+            <input type="text" id="code" name="code" required>
+            <button type="submit">確認</button>
+        </form>
+        <div>
+            <a href="{{ url_for('reset_request') }}">メール送信に戻る</a>
+        </div>
+    </div>
+</body>
+</html>

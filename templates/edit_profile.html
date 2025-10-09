@@ -36,7 +36,6 @@
                 <input type="file" id="icon-input" class="form-control">
             </div>
 
-            <!-- クロップ用プレビュー -->
             <div class="mb-3 text-center">
                 <img id="cropper-preview" style="max-width:300px; display:block; margin:auto;">
             </div>
@@ -52,7 +51,7 @@
         let cropper;
         const input = document.getElementById('icon-input');
         const image = document.getElementById('cropper-preview');
-        const hiddenInput = document.getElementById('cropped-icon');
+        const form = document.getElementById('profile-form');
 
         input.addEventListener('change', e => {
             const file = e.target.files[0];
@@ -71,14 +70,15 @@
             reader.readAsDataURL(file);
         });
 
-        document.getElementById('profile-form').addEventListener('submit', e => {
+        form.addEventListener('submit', e => {
             if (cropper) {
                 e.preventDefault();
                 cropper.getCroppedCanvas().toBlob(blob => {
-                    const formData = new FormData(e.target);
+                    if (!blob) return;
+                    const formData = new FormData(form);
                     formData.set('cropped_icon', blob, 'icon.png');
 
-                    fetch("{{ url_for('edit_profile') }}", {
+                    fetch(form.action, {
                         method: "POST",
                         body: formData
                     }).then(res => res.text()).then(() => {
