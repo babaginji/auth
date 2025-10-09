@@ -374,7 +374,7 @@ form button:hover {
 }
 
 /* -----------------------------
-   全体
+    全体
 ----------------------------- */
 body {
     font-family: 'Noto Sans JP', sans-serif;
@@ -382,34 +382,35 @@ body {
     color: #333;
     margin: 0;
     padding: 0;
-    font-size: 18px; /* ← 全体文字サイズを大きく */
-    }
-  
-  /* -----------------------------
-     ヘッダー
-  ----------------------------- */
-    header {
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+/* -----------------------------
+    ヘッダー
+----------------------------- */
+header {
     background: linear-gradient(90deg, #007bff, #00bcd4);
     color: #fff;
     text-align: center;
-    padding: 2.5rem 1rem; /* ← 高さ拡大 */
+    padding: 2.5rem 1rem;
     font-size: 1.6rem;
     font-weight: bold;
-    }
-  
-  /* -----------------------------
-     メインエリア
-  ----------------------------- */
-    main {
+}
+
+/* -----------------------------
+    メインエリア
+----------------------------- */
+main {
     max-width: 1200px;
     margin: 2.5rem auto;
     padding: 2rem;
-    }
-  
-  /* -----------------------------
-     カード（ニュースやデータ表示など）
-  ----------------------------- */
-    .card {
+}
+
+/* -----------------------------
+    カード
+----------------------------- */
+.card {
     background: #fff;
     border-radius: 1.2rem;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -417,16 +418,16 @@ body {
     margin-bottom: 2rem;
     transition: transform 0.2s;
     font-size: 1.2rem;
-    }
-  
-    .card:hover {
+}
+
+.card:hover {
     transform: scale(1.02);
-    }
-  
-  /* -----------------------------
-     ボタン
-  ----------------------------- */
-    button {
+}
+
+/* -----------------------------
+    ボタン
+----------------------------- */
+button {
     background: #007bff;
     color: white;
     border: none;
@@ -435,49 +436,97 @@ body {
     font-size: 1.2rem;
     cursor: pointer;
     transition: background 0.3s;
-    }
-  
-    button:hover {
+}
+
+button:hover {
     background: #0056b3;
-    }
-  
-  /* -----------------------------
-     入力フォーム
-  ----------------------------- */
-    input, select, textarea {
+}
+
+/* -----------------------------
+    入力フォーム
+----------------------------- */
+input, select, textarea {
     width: 100%;
     padding: 1rem;
     font-size: 1.1rem;
     border-radius: 0.6rem;
     border: 1px solid #ccc;
     margin-top: 0.8rem;
-    }
-  
-  /* -----------------------------
-     セクションタイトル
-  ----------------------------- */
-    h2 {
+}
+
+/* -----------------------------
+    セクションタイトル
+----------------------------- */
+h2 {
     font-size: 1.8rem;
     margin-bottom: 1.2rem;
-    }
-  
-  /* -----------------------------
-     アイコンなど
-  ----------------------------- */
-    .icon {
+}
+
+/* -----------------------------
+    アイコン
+----------------------------- */
+.icon {
     width: 2.2rem;
     height: 2.2rem;
     margin-right: 0.8rem;
-    }
-  
-  /* -----------------------------
-     フッター
-  ----------------------------- */
-    footer {
+}
+
+/* -----------------------------
+    フッター
+----------------------------- */
+footer {
     text-align: center;
     padding: 2rem;
     background: #f0f0f0;
     font-size: 1.1rem;
     color: #777;
+}
+
+/* -----------------------------
+    ★ スマホ対応 (768px以下)
+----------------------------- */
+@media (max-width: 768px) {
+    body {
+        font-size: 20px; /* ← 全体文字大きく */
     }
-  
+
+    header {
+        font-size: 1.9rem;
+        padding: 3rem 1rem;
+    }
+
+    main {
+        padding: 1.8rem;
+    }
+
+    .card {
+        font-size: 1.4rem;
+        padding: 2.2rem;
+        border-radius: 1.4rem;
+    }
+
+    button {
+        font-size: 1.4rem;
+        padding: 1.2rem 2.4rem;
+        border-radius: 1rem;
+    }
+
+    input, select, textarea {
+        font-size: 1.3rem;
+        padding: 1.2rem;
+    }
+
+    h2 {
+        font-size: 2rem;
+    }
+
+    .icon {
+        width: 2.6rem;
+        height: 2.6rem;
+    }
+
+    footer {
+        font-size: 1.3rem;
+        padding: 2.4rem;
+    }
+}
