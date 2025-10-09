@@ -373,3 +373,51 @@ form button:hover {
     }
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background-color: #f0f2f5; /* 背景色 */
+}
+
+/* 中央にカード型で配置 */
+.center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+/* フォームカード */
+.card {
+    width: 400px;           /* 少し大きめ */
+    padding: 30px 40px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+/* input と button をフル幅で少し大きめ */
+.card input,
+.card button {
+    width: 100%;
+    margin: 12px 0;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* ボタンカラー */
+.card button {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.card button:hover {
+    background-color: #357ab8;
+}
