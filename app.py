@@ -291,21 +291,27 @@ def reset_request():
             flash("メールアドレスが見つかりません。")
     return render_template("reset_request.html")
 
-
 @app.route("/reset/verify", methods=["GET", "POST"])
 @csrf.exempt
 def reset_verify():
     email = request.args.get("email")
     user = User.query.filter_by(email=email).first()
+
+    if not user:
+        flash("無効なメールアドレスです。")
+        return redirect(url_for("reset_request"))
+
     if request.method == "POST":
         code = request.form["code"]
-        if user and user.verify_otp(code):
+        if user.verify_otp(code):
             flash("コード認証に成功しました。新しいパスワードを設定してください。")
             return redirect(url_for("reset_password", email=email))
         else:
             flash("コードが無効または期限切れです。")
-    return render_template("reset_verify.html")
+            # 再度同じページを表示
+            return render_template("reset_verify.html", email=email)
 
+    return render_template("reset_verify.html", email=email)
 
 @app.route("/reset/password", methods=["GET", "POST"])
 @csrf.exempt

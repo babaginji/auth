@@ -6,9 +6,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
+    <div class="fullscreen-containe">
         <h2>確認コードを入力</h2>
-        <form method="POST">
+        <form method="POST" action="{{ url_for('reset_verify', email=email) }}">
             <label for="code">メールで送られたコード</label>
             <input type="text" id="code" name="code" required>
             <button type="submit">確認</button>
