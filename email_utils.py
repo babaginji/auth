@@ -1,13 +1,19 @@
 # email_utils.py
-from flask_mail import Message
-from extensions import mail
+import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 
 def send_otp_email(user, code):
-    msg = Message(
-        subject="パスワード再設定コード",
-        sender="your_email@example.com",
-        recipients=[user.email],
-        body=f"あなたの確認コードは {code} です。10分以内に入力してください。",
+    message = Mail(
+        from_email="icomunication.pass@gmail.com",
+        to_emails=user.email,
+        subject="パスワードリセットコード",
+        plain_text_content=f"あなたの確認コードは {code} です。",
     )
-    mail.send(msg)
+    try:
+        sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+        response = sg.send(message)
+        print(response.status_code, response.body, response.headers)  # ← ここで確認
+    except Exception as e:
+        print(e)

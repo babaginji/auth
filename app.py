@@ -210,6 +210,7 @@ def following(user_id):
 # パスワード変更
 # ----------------------
 @app.route("/change_password", methods=["GET", "POST"])
+@csrf.exempt
 @login_required
 def change_password():
     if request.method == "POST":
@@ -281,6 +282,8 @@ def reset_request():
         user = User.query.filter_by(email=email).first()
         if user:
             code = user.set_otp()
+            db.session.commit()
+            # 同期でメール送信
             send_otp_email(user, code)
             flash("確認コードをメールに送信しました。")
             return redirect(url_for("reset_verify", email=email))
@@ -322,7 +325,6 @@ def reset_password():
     return render_template("reset_password.html")
 
 
-# ----------------------
 # DB初期化
 # ----------------------
 with app.app_context():
