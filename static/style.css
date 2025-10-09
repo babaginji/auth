@@ -373,51 +373,111 @@ form button:hover {
     }
 }
 
-html, body {
-    height: 100%;
+/* -----------------------------
+   全体
+----------------------------- */
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #f7f8fa;
+    color: #333;
     margin: 0;
     padding: 0;
-    font-family: sans-serif;
-    background-color: #f0f2f5; /* 背景色 */
-}
-
-/* 中央にカード型で配置 */
-.center-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-}
-
-/* フォームカード */
-.card {
-    width: 400px;           /* 少し大きめ */
-    padding: 30px 40px;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    font-size: 18px; /* ← 全体文字サイズを大きく */
+    }
+  
+  /* -----------------------------
+     ヘッダー
+  ----------------------------- */
+    header {
+    background: linear-gradient(90deg, #007bff, #00bcd4);
+    color: #fff;
     text-align: center;
-}
-
-/* input と button をフル幅で少し大きめ */
-.card input,
-.card button {
-    width: 100%;
-    margin: 12px 0;
-    padding: 14px;
-    font-size: 16px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
-
-/* ボタンカラー */
-.card button {
-    background-color: #4a90e2;
+    padding: 2.5rem 1rem; /* ← 高さ拡大 */
+    font-size: 1.6rem;
+    font-weight: bold;
+    }
+  
+  /* -----------------------------
+     メインエリア
+  ----------------------------- */
+    main {
+    max-width: 1200px;
+    margin: 2.5rem auto;
+    padding: 2rem;
+    }
+  
+  /* -----------------------------
+     カード（ニュースやデータ表示など）
+  ----------------------------- */
+    .card {
+    background: #fff;
+    border-radius: 1.2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    transition: transform 0.2s;
+    font-size: 1.2rem;
+    }
+  
+    .card:hover {
+    transform: scale(1.02);
+    }
+  
+  /* -----------------------------
+     ボタン
+  ----------------------------- */
+    button {
+    background: #007bff;
     color: white;
     border: none;
+    border-radius: 0.8rem;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
     cursor: pointer;
-}
-
-.card button:hover {
-    background-color: #357ab8;
-}
+    transition: background 0.3s;
+    }
+  
+    button:hover {
+    background: #0056b3;
+    }
+  
+  /* -----------------------------
+     入力フォーム
+  ----------------------------- */
+    input, select, textarea {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    border-radius: 0.6rem;
+    border: 1px solid #ccc;
+    margin-top: 0.8rem;
+    }
+  
+  /* -----------------------------
+     セクションタイトル
+  ----------------------------- */
+    h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.2rem;
+    }
+  
+  /* -----------------------------
+     アイコンなど
+  ----------------------------- */
+    .icon {
+    width: 2.2rem;
+    height: 2.2rem;
+    margin-right: 0.8rem;
+    }
+  
+  /* -----------------------------
+     フッター
+  ----------------------------- */
+    footer {
+    text-align: center;
+    padding: 2rem;
+    background: #f0f0f0;
+    font-size: 1.1rem;
+    color: #777;
+    }
+  
