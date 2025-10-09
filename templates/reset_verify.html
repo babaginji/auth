@@ -9,22 +9,14 @@
 </head>
 <body>
     <div class="container">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            <ul class="flashes">
-                {% for msg in messages %}
-                <li>{{ msg }}</li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-        {% endwith %}
-
         <h2>確認コードを入力</h2>
-        <form method="POST" action="{{ url_for('reset_verify', email=email) }}">
+        <form method="POST">
+            <input type="hidden" name="email" value="{{ email }}">
             <label for="code">メールで送られたコード</label>
             <input type="text" id="code" name="code" required>
             <button type="submit">確認</button>
         </form>
+        
         <div>
             <a href="{{ url_for('reset_request') }}">メール送信に戻る</a>
         </div>
